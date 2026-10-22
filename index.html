@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <title>CantiereSmart - Rapportini Vittorini</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1A5694">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rapportini">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+
+  <!-- Stili Applicazione -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="app-locked">
+  <!-- Schermata di Blocco PIN Aziendale & Verifica Dispositivo Una Tantum -->
+  <div id="pin-lock-screen" class="pin-lock-overlay">
+    <div class="pin-lock-card">
+      <div class="pin-lock-brand">
+        <img id="pin-lock-logo" class="pin-logo" alt="Vittorini Costruzioni" src="" style="display:none;">
+        <h1 class="pin-lock-title">VITTORINI EMIDIO</h1>
+        <div class="pin-lock-subtitle">COSTRUZIONI S.r.l. - L'AQUILA</div>
+      </div>
+      <div class="pin-lock-heading">
+        <div id="pin-security-badge" class="pin-badge">🛡️ Verifica Dispositivo Una Tantum</div>
+        <p id="pin-instructions-text" class="pin-instructions">Inserisci il PIN aziendale per sbloccare l'applicazione:</p>
+      </div>
+
+      <!-- Modulo Verifica Dispositivo Una Tantum (mostrato solo su dispositivi non ancora convalidati) -->
+      <div id="device-verification-box" class="device-verification-box">
+        <div class="device-id-row">
+          <span class="device-id-label">ID Dispositivo:</span>
+          <strong id="display-device-id" class="device-id-code">CS-XXXX-XXXX</strong>
+        </div>
+        <div class="device-verify-step">
+          <input type="text" id="input-operator-name" class="form-input device-input-sm" placeholder="Il tuo Nome e Cognome (es. Geom. Rossi)" autocomplete="name">
+          <div class="device-verify-actions">
+            <button type="button" id="btn-request-whatsapp" class="btn btn-primary btn-sm-action">📲 Richiedi a Andrea (WhatsApp)</button>
+            <button type="button" id="btn-copy-request" class="btn btn-outline-primary btn-sm-action" title="Copia testo richiesta">📋 Copia</button>
+          </div>
+        </div>
+        <div class="device-verify-step mt-2">
+          <label class="device-code-label" for="input-activation-code">Codice di Convalida Una Tantum (o Chiave Admin):</label>
+          <input type="text" id="input-activation-code" class="form-input device-code-input" placeholder="ATTIVA-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+
+      <!-- Indicatori Cifre Digitate -->
+      <div id="pin-dots-container" class="pin-dots">
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+      </div>
+
+      <div id="pin-error-msg" class="pin-status-msg" style="display:none;"></div>
+
+      <!-- Tastierino Numerico Touch-Friendly -->
+      <div class="pin-keypad">
+        <button type="button" class="pin-key" data-num="1">1</button>
+        <button type="button" class="pin-key" data-num="2">2</button>
+        <button type="button" class="pin-key" data-num="3">3</button>
+        <button type="button" class="pin-key" data-num="4">4</button>
+        <button type="button" class="pin-key" data-num="5">5</button>
+        <button type="button" class="pin-key" data-num="6">6</button>
+        <button type="button" class="pin-key" data-num="7">7</button>
+        <button type="button" class="pin-key" data-num="8">8</button>
+        <button type="button" class="pin-key" data-num="9">9</button>
+        <div class="pin-key-placeholder"></div>
+        <button type="button" class="pin-key" data-num="0">0</button>
+        <button type="button" class="pin-key pin-key-action" id="btn-pin-delete" aria-label="Cancella">⌫</button>
+      </div>
+
+      <div id="pin-toggle-activation-wrapper" class="pin-toggle-activation" style="display:none;">
+        <button type="button" id="btn-show-activation-box" class="btn-link-subtle">Inserisci nuovo Codice di Convalida / Chiave Admin</button>
+      </div>
+
+      <div class="pin-footer-info">
+        Archivio crittografato PBKDF2-SHA256 • Uso esclusivo personale autorizzato
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Fisso Safe-Area -->
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="app-header-brand">
+        <button id="btn-open-drawer" class="btn btn-ghost" aria-label="Apri menu" data-alias="btn-open-menu">
+          <span id="menu-icon-placeholder"></span>
+        </button>
+        <img id="header-logo" class="app-header-logo" alt="Logo Vittorini" src="" style="display:none;">
+        <div>
+          <div class="app-header-title">Rapportino di Cantiere</div>
+          <div class="app-header-subtitle">Vittorini Costruzioni</div>
+        </div>
+      </div>
+      <div id="header-progress-badge" class="box-status-badge pending" aria-live="polite">
+        0 / 9 completati
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenitore Principale con i 9 Box a Spunta Verde -->
+  <main class="app-main">
+
+    <!-- BOX 1: Data & Cantiere -->
+    <section id="box-1" class="box-card" aria-labelledby="box-1-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-1-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-1-title" class="box-card-title">1. Data & Cantiere</h2>
+            <div class="box-card-subtitle">Data lavoro, cantiere e commessa</div>
+          </div>
+        </div>
+        <div id="box-1-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="form-group">
+          <label class="form-label" for="input-data">Data Lavoro</label>
+          <input type="date" id="input-data" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-cantiere">Cantiere</label>
+          <div class="autocomplete-container">
+            <input type="text" id="input-cantiere" class="form-input" placeholder="es. Santuario Madonna delle Grazie" autocomplete="off">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-localita">Località</label>
+          <input type="text" id="input-localita" class="form-input" placeholder="es. Loc. Varoni, Amatrice (RI)">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="form-group">
+            <label class="form-label" for="input-cup">Codice CUP</label>
+            <input type="text" id="input-cup" class="form-input" placeholder="es. J12C24000000001">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-cig">Codice CIG</label>
+            <input type="text" id="input-cig" class="form-input" placeholder="es. A01234567B">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-commessa">Rif. Appalto / Commessa</label>
+          <input type="text" id="input-commessa" class="form-input" placeholder="es. Sisma 2016 o Ricostruzione Pubblica">
+        </div>
+      </div>
+    </section>
+
+    <!-- BOX 2: Meteo & Clima -->
+    <section id="box-2" class="box-card" aria-labelledby="box-2-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-2-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-2-title" class="box-card-title">2. Meteo & Clima</h2>
+            <div class="box-card-subtitle">Condizioni climatiche della giornata</div>
+          </div>
+        </div>
+        <div id="box-2-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="form-group mb-0">
+          <label class="form-label">Condizioni Meteo della Giornata</label>
+          <div class="weather-grid">
+            <button type="button" class="weather-btn" data-weather="sereno" aria-label="Meteo Sereno">
+              <span id="weather-icon-sereno"></span>
+              <span>SERENO</span>
+            </button>
+            <button type="button" class="weather-btn" data-weather="nuvoloso" aria-label="Meteo Nuvoloso">
+              <span id="weather-icon-nuvoloso"></span>
+              <span>NUVOLOSO</span>
+            </button>
+            <button type="button" class="weather-btn" data-weather="pioggia" aria-label="Meteo Pioggia">
+              <span id="weather-icon-pioggia"></span>
+              <span>PIOGGIA</span>
+            </button>
+            <button type="button" class="weather-btn" data-weather="neve" aria-label="Meteo Neve o Gelo">
+              <span id="weather-icon-neve"></span>
+              <span>NEVE / GELO</span>
+            </button>
+            <button type="button" class="weather-btn" data-weather="caldo" aria-label="Meteo Caldo Estremo">
+              <span id="weather-icon-caldo"></span>
+              <span>CALDO ESTREMO</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOX 3: Lavorazioni Eseguite -->
+    <section id="box-3" class="box-card" aria-labelledby="box-3-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-3-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-3-title" class="box-card-title">3. Lavorazioni Eseguite</h2>
+            <div class="box-card-subtitle">Attività svolte in cantiere</div>
+          </div>
+        </div>
+        <div id="box-3-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="flex items-center justify-between mb-2">
+          <label class="form-label mb-0" for="input-lavorazioni">Attività Giornaliere</label>
+          <button type="button" id="btn-na-lavorazioni" class="btn-quick-na">Nessuna attività oggi</button>
+        </div>
+        <textarea id="input-lavorazioni" class="form-textarea" rows="4" placeholder="Descrivi dettagliatamente le lavorazioni svolte oggi... (Consiglio: tocca l'icona del microfono sulla tastiera dello smartphone per dettare a voce)"></textarea>
+      </div>
+    </section>
+
+    <!-- BOX 4: Personale Vittorini Costruzioni -->
+    <section id="box-4" class="box-card" aria-labelledby="box-4-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-4-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-4-title" class="box-card-title">4. Personale Vittorini</h2>
+            <div class="box-card-subtitle">Operai presenti dell'impresa & ore lavorate</div>
+          </div>
+        </div>
+        <div id="box-4-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="flex items-center justify-between mb-2">
+          <span id="box4-count-badge" class="font-bold text-sm text-primary">Totale personale Vittorini: 0</span>
+          <button type="button" id="btn-zero-operai" class="btn-quick-na">0 Operai Vittorini</button>
+        </div>
+        <div class="text-xs text-neutral mb-1">Tocca un operaio per aggiungerlo / rimuoverlo:</div>
+        <div id="box4-chips-container" class="chip-list"></div>
+        <div class="flex gap-2 mt-3">
+          <div class="autocomplete-container flex-1">
+            <input type="text" id="input-add-operaio" class="form-input" placeholder="Cerca o inserisci operaio..." autocomplete="off">
+          </div>
+          <div class="hours-input-wrapper">
+            <input type="number" id="input-operaio-ore" class="form-input text-center hours-field" value="8" min="1" max="24" title="Ore lavorate">
+            <span class="hours-watermark">ore</span>
+          </div>
+          <button type="button" id="btn-add-operaio" class="btn btn-primary" style="min-height:52px; white-space:nowrap;">✓ OK Aggiungi</button>
+        </div>
+        <div id="box4-selected-operai" class="entry-list mt-3"></div>
+      </div>
+    </section>
+
+    <!-- BOX 5: Subappaltatori -->
+    <section id="box-5" class="box-card" aria-labelledby="box-5-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-5-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-5-title" class="box-card-title">5. Subappaltatori</h2>
+            <div class="box-card-subtitle">Ditte esterne, operai e lavorazioni</div>
+          </div>
+        </div>
+        <div id="box-5-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="flex items-center justify-between mb-2">
+          <span id="box5-count-badge" class="font-bold text-sm text-primary">Totale personale Subappaltatori: 0</span>
+          <button type="button" id="btn-nessun-sub" class="btn-quick-na">Nessun subappaltatore</button>
+        </div>
+        <div id="box5-sub-list" class="entry-list mb-3"></div>
+        <div class="p-3 bg-light rounded-md" style="border: 1px solid var(--color-border-subtle);">
+          <div class="form-group mb-2">
+            <label class="form-label" for="input-sub-ditta">Ditta Subappalto</label>
+            <div class="autocomplete-container">
+              <input type="text" id="input-sub-ditta" class="form-input" placeholder="es. IPPOLITI PONTEGGI" autocomplete="off">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <div>
+              <label class="form-label" for="input-sub-operai">N° Operai</label>
+              <input type="number" id="input-sub-operai" class="form-input" value="2" min="1" max="50">
+            </div>
+            <div>
+              <label class="form-label" for="input-sub-lavorazione">Lavorazione</label>
+              <input type="text" id="input-sub-lavorazione" class="form-input" placeholder="es. Ponteggio facciata">
+            </div>
+          </div>
+          <button type="button" id="btn-add-sub" class="btn btn-outline-primary btn-block" style="min-height:52px;">+ Aggiungi Ditta Subappalto</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOX 6: Noleggi & Mezzi -->
+    <section id="box-6" class="box-card" aria-labelledby="box-6-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-6-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-6-title" class="box-card-title">6. Noleggi & Mezzi</h2>
+            <div class="box-card-subtitle">Macchinari e attrezzature a nolo con ore</div>
+          </div>
+        </div>
+        <div id="box-6-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="flex items-center justify-between mb-2">
+          <span id="box6-count-badge" class="text-sm font-semibold text-neutral">Macchinari presenti oggi</span>
+          <button type="button" id="btn-nessun-noleggio" class="btn-quick-na">Nessun noleggio</button>
+        </div>
+        <div class="flex gap-2">
+          <div class="autocomplete-container flex-1">
+            <input type="text" id="input-add-noleggio" class="form-input" placeholder="Scrivi mezzo a nolo (es. Escavatore 50q)..." autocomplete="off">
+          </div>
+          <div class="hours-input-wrapper">
+            <input type="number" id="input-noleggio-ore" class="form-input text-center hours-field" value="8" min="1" max="24" title="Ore utilizzo">
+            <span class="hours-watermark">ore</span>
+          </div>
+          <button type="button" id="btn-add-noleggio" class="btn btn-primary" style="min-height:52px; white-space:nowrap;">✓ OK Aggiungi</button>
+        </div>
+        <div id="box6-noleggi-list" class="entry-list mt-3"></div>
+      </div>
+    </section>
+
+    <!-- BOX 7: Materiali & Forniture -->
+    <section id="box-7" class="box-card" aria-labelledby="box-7-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-7-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-7-title" class="box-card-title">7. Forniture & Materiali</h2>
+            <div class="box-card-subtitle">Materiali arrivati o impiegati in cantiere</div>
+          </div>
+        </div>
+        <div id="box-7-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="flex items-center justify-between mb-2">
+          <label class="form-label mb-0" for="input-materiali">Materiali di Giornata</label>
+          <button type="button" id="btn-nessun-materiale" class="btn-quick-na">Nessun materiale oggi</button>
+        </div>
+        <textarea id="input-materiali" class="form-textarea" rows="3" placeholder="es. Calcestruzzo Rck 30 m³ 18, Ferro B450C kg 1.200, Malta sacchi 20..."></textarea>
+      </div>
+    </section>
+
+    <!-- BOX 8: Note Generali & D.L. -->
+    <section id="box-8" class="box-card" aria-labelledby="box-8-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-8-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-8-title" class="box-card-title">8. Note Generali & D.L.</h2>
+            <div class="box-card-subtitle">Ordini di servizio, visite, sicurezza</div>
+          </div>
+        </div>
+        <div id="box-8-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="flex items-center justify-between mb-2">
+          <label class="form-label mb-0" for="input-note">Note e Comunicazioni</label>
+          <button type="button" id="btn-nessuna-nota" class="btn-quick-na">Nessuna nota</button>
+        </div>
+        <textarea id="input-note" class="form-textarea" rows="3" placeholder="es. Visita D.L. Ing. Rossi ore 10:30; richiesta prova di compressione sui provini di calcestruzzo; sicurezza conforme al POS..."></textarea>
+      </div>
+    </section>
+
+    <!-- BOX 9: Foto di Cantiere (Max 8) -->
+    <section id="box-9" class="box-card" aria-labelledby="box-9-title">
+      <div class="box-card-header">
+        <div class="box-card-title-group">
+          <div id="box-9-icon" class="box-card-icon"></div>
+          <div>
+            <h2 id="box-9-title" class="box-card-title">9. Foto di Cantiere</h2>
+            <div class="box-card-subtitle">Documentazione fotografica (max 8 foto)</div>
+          </div>
+        </div>
+        <div id="box-9-badge" class="box-status-badge pending">Da compilare</div>
+      </div>
+      <div class="box-card-body">
+        <div class="flex items-center justify-between mb-2">
+          <span id="box9-photo-counter" class="font-bold text-sm text-primary">0 / 8 foto caricate</span>
+          <button type="button" id="btn-nessuna-foto" class="btn-quick-na">Nessuna foto oggi</button>
+        </div>
+        <label for="photo-file-input" id="label-add-photo" class="btn btn-outline-primary btn-block mt-2" style="min-height:54px; cursor:pointer;">
+          <span id="camera-icon-ph"></span>
+          <span>+ Scatta / Aggiungi Foto</span>
+        </label>
+        <input type="file" id="photo-file-input" accept="image/*" capture="environment" multiple style="display:none;">
+        <div id="box9-photo-grid" class="photo-grid"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Barra Fissa Inferiore (Azioni di Esportazione & Salvataggio) -->
+  <nav class="app-bottom-bar" aria-label="Azioni di esportazione">
+    <div class="app-bottom-bar-inner">
+      <div class="bottom-bar-meta">
+        <div id="preview-filename" class="bottom-filename">2026-10-19_Rapportino.pdf</div>
+        <div id="bottom-alert-banner" class="bottom-alert">⚠️ 9 box da completare</div>
+      </div>
+      <button type="button" id="btn-complete-rapportino" class="btn btn-success btn-block" style="min-height:50px; font-size:16px; font-weight:700;">
+        <span id="complete-icon-ph"></span>
+        <span>✓ Concludi e Salva Rapportino</span>
+      </button>
+      <div class="bottom-bar-actions">
+        <button type="button" id="btn-download-pdf" class="btn btn-primary btn-block">
+          <span id="pdf-icon-ph"></span>
+          <span>Scarica PDF</span>
+        </button>
+        <button type="button" id="btn-download-docx" class="btn btn-outline-primary btn-block">
+          <span id="docx-icon-ph"></span>
+          <span>Scarica Word (.docx)</span>
+        </button>
+      </div>
+      <div class="bottom-bar-secondary">
+        <button type="button" id="btn-save-draft" class="btn-text-action">
+          <span id="save-icon-ph"></span>
+          <span>Salva Bozza nel Registro</span>
+        </button>
+        <button type="button" id="btn-reset-report" class="btn-text-action text-danger">
+          <span>↺ Nuovo Rapportino</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Drawer Laterale Menu Sandwich (Task 4) -->
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+  <aside id="drawer-panel" class="drawer-panel" aria-label="Menu principale" aria-hidden="true" role="dialog" aria-modal="true">
+    <!-- Header Drawer -->
+    <div class="drawer-header">
+      <div class="flex items-center gap-2">
+        <img id="drawer-logo" class="app-header-logo" alt="Logo Vittorini" src="" style="display:none;">
+        <div>
+          <div class="drawer-header-title">Menu Cantiere</div>
+          <div class="drawer-header-subtitle">Vittorini Costruzioni S.r.l.</div>
+        </div>
+      </div>
+      <button type="button" id="btn-close-drawer" class="btn btn-ghost text-white" aria-label="Chiudi menu">✕</button>
+    </div>
+
+    <!-- Barra Navigazione Schede Drawer -->
+    <nav class="drawer-nav-tabs" aria-label="Sezioni del menu">
+      <button type="button" class="drawer-nav-tab active" data-tab="promemoria" id="tab-btn-promemoria">
+        <span id="tab-icon-promemoria"></span>
+        <span>Promemoria</span>
+      </button>
+      <button type="button" class="drawer-nav-tab" data-tab="rubrica" id="tab-btn-rubrica">
+        <span id="tab-icon-rubrica"></span>
+        <span>Rubrica</span>
+      </button>
+      <button type="button" class="drawer-nav-tab" data-tab="storico" id="tab-btn-storico">
+        <span id="tab-icon-storico"></span>
+        <span>Storico</span>
+      </button>
+      <button type="button" class="drawer-nav-tab" data-tab="backup" id="tab-btn-backup">
+        <span id="tab-icon-backup"></span>
+        <span>Backup</span>
+      </button>
+    </nav>
+
+    <!-- Contenuto a Scorrimento -->
+    <div class="drawer-content">
+      <!-- SEZIONE 1: PROMEMORIA & NOTIFICHE (11:55 / 16:55) -->
+      <section id="section-promemoria" class="drawer-section active" aria-labelledby="heading-promemoria">
+        <h3 id="heading-promemoria" class="drawer-section-title">
+          <span id="icon-ph-promemoria-head"></span>
+          <span>Promemoria Cantiere</span>
+        </h3>
+        <p class="drawer-section-desc">Ricevi notifiche sul dispositivo per non dimenticare la compilazione del rapportino giornaliero.</p>
+
+        <!-- Toggle Switch -->
+        <div class="switch-container">
+          <div class="switch-label-group">
+            <span class="switch-label">Notifiche Promemoria</span>
+            <span class="switch-hint" id="reminder-status-hint">Attive nei giorni feriali</span>
+          </div>
+          <label class="switch" for="toggle-reminder-enabled">
+            <input type="checkbox" id="toggle-reminder-enabled" checked aria-label="Abilita promemoria notifiche">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <!-- Card Orari Rigorosi 11:55 e 16:55 -->
+        <div class="reminder-card">
+          <div class="reminder-time-row">
+            <div>
+              <div class="reminder-time-label">1° Promemoria (Pranzo)</div>
+              <div class="text-xs text-neutral">Predefinito 11:55</div>
+            </div>
+            <input type="time" id="reminder-time-1" class="reminder-time-input" value="11:55" aria-label="Orario primo promemoria">
+          </div>
+          <div class="reminder-time-row">
+            <div>
+              <div class="reminder-time-label">2° Promemoria (Fine turno)</div>
+              <div class="text-xs text-neutral">Predefinito 16:55</div>
+            </div>
+            <input type="time" id="reminder-time-2" class="reminder-time-input" value="16:55" aria-label="Orario secondo promemoria">
+          </div>
+        </div>
+
+        <!-- Selettore Giorni Lavorativi -->
+        <div class="form-group mb-3">
+          <label class="form-label mb-1">Giorni Lavorativi Attivi</label>
+          <div class="days-chip-grid" id="reminder-days-grid">
+            <button type="button" class="day-chip active" data-day="1" aria-label="Lunedì">Lun</button>
+            <button type="button" class="day-chip active" data-day="2" aria-label="Martedì">Mar</button>
+            <button type="button" class="day-chip active" data-day="3" aria-label="Mercoledì">Mer</button>
+            <button type="button" class="day-chip active" data-day="4" aria-label="Giovedì">Gio</button>
+            <button type="button" class="day-chip active" data-day="5" aria-label="Venerdì">Ven</button>
+            <button type="button" class="day-chip" data-day="6" aria-label="Sabato">Sab</button>
+            <button type="button" class="day-chip" data-day="0" aria-label="Domenica">Dom</button>
+          </div>
+        </div>
+
+        <!-- Pulsante Test Notifica -->
+        <button type="button" id="btn-test-notification" class="btn btn-outline-primary btn-block mb-3">
+          <span id="btn-test-notif-icon"></span>
+          <span>🔔 Invia Notifica di Test Subito</span>
+        </button>
+
+        <!-- Stato Permessi Web Notification -->
+        <div id="notification-perm-badge" class="p-2 text-xs rounded-md bg-light text-neutral text-center">
+          Stato permessi notifiche: Verifico...
+        </div>
+      </section>
+
+      <!-- SEZIONE 2: RUBRICA & ANAGRAFICHE LOCALI -->
+      <section id="section-rubrica" class="drawer-section" aria-labelledby="heading-rubrica">
+        <h3 id="heading-rubrica" class="drawer-section-title">
+          <span id="icon-ph-rubrica-head"></span>
+          <span>Rubrica & Anagrafiche</span>
+        </h3>
+        <p class="drawer-section-desc">Gestisci cantieri, operai, subappalti e noleggi per averli pronti nell'autocomplete.</p>
+
+        <!-- Subnav Rubrica -->
+        <div class="rubrica-subnav" role="tablist">
+          <button type="button" class="rubrica-pill active" data-sub="cantieri" id="rubrica-sub-cantieri">Cantieri (<span id="count-cantieri">0</span>)</button>
+          <button type="button" class="rubrica-pill" data-sub="operai" id="rubrica-sub-operai">Personale (<span id="count-operai">0</span>)</button>
+          <button type="button" class="rubrica-pill" data-sub="subappalti" id="rubrica-sub-subappalti">Subappalti (<span id="count-subappalti">0</span>)</button>
+          <button type="button" class="rubrica-pill" data-sub="noleggi" id="rubrica-sub-noleggi">Noleggi (<span id="count-noleggi">0</span>)</button>
+        </div>
+
+        <!-- Lista dinamica elementi -->
+        <div id="rubrica-list-container" class="rubrica-list-container"></div>
+
+        <!-- Modulo rapido aggiunta elemento anagrafica -->
+        <div id="rubrica-add-box" class="rubrica-add-form"></div>
+      </section>
+
+      <!-- SEZIONE 3: REGISTRO & STORICO RAPPORTINI -->
+      <section id="section-storico" class="drawer-section" aria-labelledby="heading-storico">
+        <h3 id="heading-storico" class="drawer-section-title">
+          <span id="icon-ph-storico-head"></span>
+          <span>Registro Rapportini</span>
+        </h3>
+        <p class="drawer-section-desc">Consulta o riapri i rapportini salvati nella memoria locale dello smartphone.</p>
+
+        <div id="history-list-container" class="history-list"></div>
+      </section>
+
+      <!-- SEZIONE 4: BACKUP & RIPRISTINO -->
+      <section id="section-backup" class="drawer-section" aria-labelledby="heading-backup">
+        <h3 id="heading-backup" class="drawer-section-title">
+          <span id="icon-ph-backup-head"></span>
+          <span>Backup & Sincronizzazione</span>
+        </h3>
+        <p class="drawer-section-desc">Salva o ripristina tutti i tuoi cantieri, anagrafiche e rapportini in un unico file JSON.</p>
+
+        <!-- Card Esporta -->
+        <div class="backup-card">
+          <div class="backup-card-title">
+            <span id="icon-ph-download-backup"></span>
+            <span>Esporta Archivio Completo</span>
+          </div>
+          <div class="backup-card-desc">Salva una copia di sicurezza di tutti i dati per trasferirli su un altro telefono o archiviarli.</div>
+          <button type="button" id="btn-export-backup" class="btn btn-primary btn-block">
+            <span>⬇️ Esporta Backup (JSON)</span>
+          </button>
+        </div>
+
+        <!-- Card Importa -->
+        <div class="backup-card">
+          <div class="backup-card-title">
+            <span id="icon-ph-upload-backup"></span>
+            <span>Ripristina Archivio</span>
+          </div>
+          <div class="backup-card-desc">Carica un file di backup precedente per sincronizzare cantieri e storico.</div>
+          <input type="file" id="input-backup-file" accept=".json,application/json" style="display:none;">
+          <button type="button" id="btn-import-backup" class="btn btn-outline-primary btn-block">
+            <span>⬆️ Ripristina da Backup (JSON)</span>
+          </button>
+        </div>
+
+        <!-- Card Reset Fabbrica -->
+        <div class="backup-card">
+          <div class="backup-card-title text-danger">
+            <span>↺ Dati Vittorini Predefiniti</span>
+          </div>
+          <div class="backup-card-desc">Ripristina l'elenco iniziale dei cantieri e del personale dell'impresa Vittorini.</div>
+          <button type="button" id="btn-reset-defaults" class="btn btn-text-action text-danger">
+            <span>Ripristina Dati Predefiniti</span>
+          </button>
+        </div>
+
+        <!-- Card Pannello Admin: Convalida Dispositivi (visibile solo a Andrea) -->
+        <div id="admin-approval-card" class="backup-card admin-approval-card" style="display:none;">
+          <div class="backup-card-title text-primary">
+            <span>🛡️ Convalida Dispositivo Collaboratore (Admin)</span>
+          </div>
+          <div class="backup-card-desc">Genera un codice di attivazione Una Tantum vincolato all'ID del telefono di un geometra o capocantiere.</div>
+          <div class="form-group mb-2">
+            <label class="form-label" for="admin-target-device-id">ID Dispositivo del Collaboratore</label>
+            <input type="text" id="admin-target-device-id" class="form-input" placeholder="es. CS-7B4E-91A2" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="form-group mb-2">
+            <label class="form-label" for="admin-target-user-name">Nome Collaboratore (opzionale)</label>
+            <input type="text" id="admin-target-user-name" class="form-input" placeholder="es. Geom. Marco Rossi" autocomplete="off">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="btn-admin-generate-code" class="btn btn-outline-primary btn-block">
+              <span>🔑 Genera Codice</span>
+            </button>
+            <button type="button" id="btn-admin-whatsapp-code" class="btn btn-primary btn-block">
+              <span>📲 Invia WhatsApp</span>
+            </button>
+          </div>
+          <div id="admin-generated-code-box" class="admin-generated-code-box" style="display:none;">
+            <div class="text-xs text-neutral mb-1">Codice Una Tantum generato (già copiato):</div>
+            <div id="admin-generated-code-text" class="admin-generated-code-text"></div>
+          </div>
+        </div>
+
+        <!-- Card Sicurezza & Blocco PIN -->
+        <div class="backup-card">
+          <div class="backup-card-title text-primary">
+            <span>🔒 Sicurezza & Accesso</span>
+          </div>
+          <div id="security-device-status" class="text-xs font-semibold text-primary mb-1"></div>
+          <div class="backup-card-desc">Blocca la sessione corrente su questo dispositivo. Per riaccedere sarà necessario inserire il PIN aziendale.</div>
+          <button type="button" id="btn-lock-app" class="btn btn-outline-primary btn-block">
+            <span>Blocca Applicazione</span>
+          </button>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <!-- Modale Completamento Rapportino -->
+  <div id="modal-completion-backdrop" class="modal-backdrop" style="display:none;"></div>
+  <div id="modal-completion" class="modal-dialog" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-completion-title">
+    <div class="modal-dialog-header">
+      <div class="flex items-center gap-2">
+        <div class="completion-check-icon">✓</div>
+        <div>
+          <h3 id="modal-completion-title" class="modal-dialog-title">Rapportino Concluso!</h3>
+          <div class="modal-dialog-subtitle">Pronto per esportazione e archiviazione</div>
+        </div>
+      </div>
+      <button type="button" id="btn-close-modal-completion" class="modal-close-btn" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="modal-dialog-body">
+      <div id="modal-completion-summary" class="completion-summary-card">
+        <!-- Generato dinamicamente con riepilogo dati -->
+      </div>
+      <div class="completion-actions-grid mt-3">
+        <button type="button" id="btn-modal-download-pdf" class="btn btn-primary btn-block">
+          <span id="modal-pdf-icon-ph"></span>
+          <span>Scarica PDF Ufficiale</span>
+        </button>
+        <button type="button" id="btn-modal-download-docx" class="btn btn-outline-primary btn-block">
+          <span id="modal-docx-icon-ph"></span>
+          <span>Scarica Word (.docx)</span>
+        </button>
+      </div>
+      <div class="flex items-center justify-between mt-3 pt-2" style="border-top:1px solid var(--color-border-subtle);">
+        <button type="button" id="btn-modal-new-report" class="btn-text-action text-primary">
+          <span>↺ Inizia Nuovo Rapportino</span>
+        </button>
+        <button type="button" id="btn-modal-close-btn" class="btn btn-outline" style="min-height:40px; padding:0 16px;">
+          <span>Chiudi</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Script Fondamentali -->
+  <script src="assets/logo-vittorini.js"></script>
+  <script src="assets/template-assets.js"></script>
+  <script src="assets/icons.js"></script>
+  <script src="js/lib/jspdf.umd.min.js"></script>
+  <script src="js/lib/fflate.umd.min.js"></script>
+  <script src="js/lib/docx.umd.js"></script>
+  <script src="js/pdf-generator.js"></script>
+  <script src="js/docx-generator.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/autocomplete.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/drawer.js"></script>
+  <script src="js/init.js"></script>
+</body>
+</html>

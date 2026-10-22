@@ -1,0 +1,1999 @@
+/**
+ * CantiereSmart - Mobile-First PWA Design System & Styles
+ * Impresa Vittorini Emidio Costruzioni S.r.l.
+ * 
+ * Conforme a ui-ux-pro-max e standard outdoor high-contrast
+ */
+
+/* ==========================================================================
+   1. DESIGN TOKENS (CSS Custom Properties)
+   ========================================================================== */
+:root {
+  /* Palette Istituzionale Vittorini */
+  --color-primary: #1A5694;          /* Navy Istituzionale Vittorini */
+  --color-primary-dark: #133E6B;     /* Navy scuro per active/hover */
+  --color-primary-light: #EBF3FA;    /* Navy chiarissimo per sfondi badge */
+  
+  --color-accent: #00A3E0;           /* Ciano Accento */
+  --color-accent-dark: #0082B3;      /* Ciano scuro */
+  --color-accent-light: #E0F7FE;     /* Ciano chiarissimo */
+
+  --color-success: #10B981;          /* Verde Smeraldo per Box Completati */
+  --color-success-light: #ECFDF5;    /* Sfondo box/badge completati */
+  --color-success-border: #059669;   /* Bordo marcato completato */
+  --color-success-glow: rgba(16, 185, 129, 0.2);
+
+  --color-warning: #F59E0B;          /* Avvisi / In attesa */
+  --color-warning-light: #FEF3C7;
+  --color-danger: #EF4444;           /* Eliminazione / Errori */
+  --color-danger-light: #FEE2E2;
+
+  --color-neutral: #64748B;          /* Testo secondario / icone inattive */
+  --color-neutral-dark: #334155;     /* Testo scuro corpo */
+  --color-neutral-light: #F1F5F9;    /* Superfici neutre */
+  --color-neutral-border: #CBD5E1;   /* Bordi standard */
+  --color-border-subtle: #E2E8F0;
+
+  --color-dark: #0F172A;             /* Testo titoli alto contrasto */
+  --color-light: #F8FAFC;            /* Sfondo generale app */
+  --color-white: #FFFFFF;            /* Superficie card */
+
+  /* Spacing Scale (4/8dp standard) */
+  --space-05: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Touch Targets Minimi per uso in cantiere */
+  --touch-target-min: 48px;
+  --touch-button-height: 52px;
+  --touch-input-height: 52px;
+
+  /* Raggi di curvatura */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+
+  /* Ombreggiature ad alto contrasto */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+  --shadow-completed: 0 0 0 2px var(--color-success-border), 0 4px 14px var(--color-success-glow);
+
+  /* Tipografia */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ==========================================================================
+   2. RESET & MOBILE BASE OPTIMIZATIONS
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-dark);
+  background-color: var(--color-light);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  font-family: var(--font-sans);
+}
+
+/* Supporto Safe Areas per iPhone / Android con Notch */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ==========================================================================
+   3. LAYOUT PRINCIPALE & HEADER
+   ========================================================================== */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding-top: env(safe-area-inset-top, 0px);
+  box-shadow: 0 2px 8px rgba(19, 62, 107, 0.25);
+}
+
+.app-header-inner {
+  height: 56px;
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.app-header-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: inherit;
+}
+
+.app-header-logo {
+  height: 36px;
+  width: auto;
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  padding: 2px 4px;
+  object-fit: contain;
+}
+
+.app-header-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.app-header-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.02em;
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ==========================================================================
+   4. I 9 BOX CARD CON STATO SPUNTA VERDE (Core Requirement)
+   ========================================================================== */
+.box-card {
+  position: relative;
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Box Card Completato - Bordo Verde Smeraldo, Glow Sottile e Sfondo Chiaro */
+.box-card.completed {
+  border-color: var(--color-success-border);
+  box-shadow: var(--shadow-completed);
+  background-color: var(--color-white);
+}
+
+.box-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.box-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1;
+}
+
+.box-card-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.box-card.completed .box-card-icon {
+  background-color: var(--color-success-light);
+  color: var(--color-success-border);
+}
+
+.box-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-dark);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.box-card-subtitle {
+  font-size: 13px;
+  color: var(--color-neutral);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge di Completamento (Spunta Verde) */
+.box-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.box-status-badge.pending {
+  background-color: var(--color-neutral-light);
+  color: var(--color-neutral);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.box-status-badge.completed {
+  background-color: var(--color-success-light);
+  color: var(--color-success-border);
+  border: 1.5px solid var(--color-success);
+}
+
+.box-card-body {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-neutral-light);
+}
+
+.box-card-footer {
+  margin-top: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* ==========================================================================
+   5. PULSANTI E COMPONENTI TOUCH (>= 48dp, 52px bottoni chiave)
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-button-height);
+  padding: 0 var(--space-5);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  -webkit-appearance: none;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Varianti Bottoni */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: 0 2px 4px rgba(26, 86, 148, 0.2);
+}
+.btn-primary:active {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-accent {
+  background-color: var(--color-accent);
+  color: var(--color-white);
+}
+.btn-accent:active {
+  background-color: var(--color-accent-dark);
+}
+
+.btn-success {
+  background-color: var(--color-success);
+  color: var(--color-white);
+  box-shadow: 0 2px 4px var(--color-success-glow);
+}
+.btn-success:active {
+  background-color: var(--color-success-border);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1.5px solid var(--color-neutral-border);
+  color: var(--color-dark);
+}
+.btn-outline:active {
+  background-color: var(--color-neutral-light);
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  border: 1.5px solid var(--color-primary);
+  color: var(--color-primary);
+}
+.btn-outline-primary:active {
+  background-color: var(--color-primary-light);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: inherit;
+  border: none;
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: 0 var(--space-2);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* Pulsante Rapido "Nessuno / N.A." */
+.btn-quick-na {
+  min-height: 42px;
+  padding: 0 var(--space-3);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-neutral-border);
+  background-color: var(--color-neutral-light);
+  color: var(--color-neutral-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-quick-na:active {
+  transform: scale(0.97);
+}
+
+.btn-quick-na.active {
+  background-color: var(--color-success-light);
+  border-color: var(--color-success-border);
+  color: var(--color-success-border);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   6. CAMPI INPUT & FORM (No zoom su iOS con font-size >= 16px)
+   ========================================================================== */
+.form-group {
+  margin-bottom: var(--space-3);
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-neutral-dark);
+  margin-bottom: var(--space-1);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  min-height: var(--touch-input-height);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-sans);
+  font-size: 16px; /* Previene auto-zoom su iOS Safari */
+  color: var(--color-dark);
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-neutral-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  -webkit-appearance: none;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(26, 86, 148, 0.15);
+}
+
+.form-textarea {
+  min-height: 100px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* ==========================================================================
+   6.1 AUTOCOMPLETE TOUCH-FRIENDLY COMPONENT
+   ========================================================================== */
+.autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-neutral-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  max-height: 280px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px;
+}
+
+.autocomplete-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 48px; /* Tassativo >= 48px per touch da cantiere */
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--color-dark);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.12s ease;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item:active,
+.autocomplete-item.active {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.autocomplete-item-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.autocomplete-sublabel {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-neutral);
+  margin-top: 2px;
+}
+
+.autocomplete-match {
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Pulsante Azione + Aggiungi in cima alla lista */
+.autocomplete-add-action {
+  background-color: var(--color-primary-light);
+  border: 1.5px dashed var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.autocomplete-add-action:hover,
+.autocomplete-add-action:active,
+.autocomplete-add-action.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-style: solid;
+}
+
+.autocomplete-empty {
+  min-height: 48px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  color: var(--color-neutral);
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Wrapper input ore con indicazione watermark in trasparenza */
+.hours-input-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 95px;
+  flex-shrink: 0;
+}
+
+.hours-input-wrapper .hours-field {
+  padding-right: 36px !important;
+  text-align: right;
+  font-weight: 700;
+}
+
+.hours-watermark {
+  position: absolute;
+  right: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(100, 116, 139, 0.65);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ==========================================================================
+   7. SELETTORE METEO A 4 STATI (Sereno, Nuvoloso, Pioggia, Neve)
+   ========================================================================== */
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+  gap: var(--space-2);
+}
+
+.weather-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 72px;
+  padding: var(--space-2) var(--space-1);
+  border: 2px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  color: var(--color-neutral);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.weather-btn .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.weather-btn:active {
+  transform: scale(0.96);
+}
+
+.weather-btn.active {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  box-shadow: 0 2px 6px rgba(26, 86, 148, 0.15);
+}
+
+/* Stepper Temperatura */
+.stepper-group {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--color-neutral-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  overflow: hidden;
+  height: var(--touch-input-height);
+}
+
+.stepper-btn {
+  width: 52px;
+  height: 100%;
+  border: none;
+  background-color: var(--color-neutral-light);
+  color: var(--color-primary);
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.stepper-btn:active {
+  background-color: var(--color-primary-light);
+}
+
+.stepper-value {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+/* ==========================================================================
+   8. LISTE ELEMENTI DINAMICI (Operai, Subappalti, Noleggi, Materiali)
+   ========================================================================== */
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.entry-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-neutral-light);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  min-height: 48px;
+}
+
+.entry-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-dark);
+  flex: 1;
+}
+
+.entry-meta {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-neutral);
+}
+
+.entry-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-danger);
+  cursor: pointer;
+  padding: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.operaio-hours-stepper,
+.noleggio-hours-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+
+.hours-input-sm {
+  width: 44px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   9. FOTO GALLERY E UPLOAD ANTEPRIMA (Box 9: Foto Cantiere)
+   ========================================================================== */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+@media (min-width: 600px) {
+  .photo-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.photo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: 6px;
+}
+
+.photo-thumb-wrapper {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--color-border-subtle);
+  background-color: var(--color-neutral-light);
+}
+
+.photo-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-caption-input {
+  width: 100%;
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid var(--color-neutral-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  background-color: var(--color-neutral-light);
+  color: var(--color-dark);
+  font-family: inherit;
+}
+
+.photo-caption-input:focus {
+  border-color: var(--color-primary);
+  background-color: var(--color-white);
+}
+
+.photo-remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background-color: rgba(15, 23, 42, 0.75);
+  color: var(--color-white);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   10. BARRA FISSA INFERIORE (PDF & Word Export)
+   ========================================================================== */
+.app-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1.5px solid var(--color-border-subtle);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.app-bottom-bar-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-2) var(--space-4) var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.bottom-bar-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 20px;
+}
+
+.bottom-filename {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 65%;
+}
+
+.bottom-alert {
+  font-size: 11px;
+  font-weight: 700;
+  color: #B45309;
+  background-color: var(--color-warning-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-warning);
+  white-space: nowrap;
+}
+
+.bottom-alert.ready {
+  color: var(--color-success-border);
+  background-color: var(--color-success-light);
+  border-color: var(--color-success);
+}
+
+.bottom-bar-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.bottom-bar-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 2px;
+}
+
+.btn-text-action {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-neutral);
+  cursor: pointer;
+  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-text-action:hover, .btn-text-action:active {
+  color: var(--color-dark);
+}
+
+.btn-text-action.text-danger:hover, .btn-text-action.text-danger:active {
+  color: var(--color-danger);
+}
+
+/* Chips per Operai e Noleggi */
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px; /* Touch target >= 48px */
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-neutral-border);
+  background-color: var(--color-white);
+  color: var(--color-dark);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  -webkit-appearance: none;
+}
+
+.chip-btn:active {
+  transform: scale(0.96);
+}
+
+.chip-btn.active {
+  background-color: var(--color-success-light);
+  border-color: var(--color-success-border);
+  color: var(--color-success-border);
+  box-shadow: 0 0 0 1px var(--color-success-border);
+  font-weight: 700;
+}
+
+.chip-btn-remove {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Badge numerico foto */
+.photo-number-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background-color: rgba(15, 23, 42, 0.75);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
+
+/* Toast per feedback cantiere */
+.toast-container {
+  position: fixed;
+  bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  width: 90%;
+  max-width: 400px;
+}
+
+.toast {
+  background-color: rgba(15, 23, 42, 0.92);
+  color: #FFFFFF;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   11. DRAWER LATERALE (Menù Sandwich)
+   ========================================================================== */
+/* Body lock quando il drawer è aperto */
+body.drawer-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: rgba(15, 23, 42, 0.6);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.28s ease;
+  backdrop-filter: blur(2px);
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawer-panel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 400px;
+  max-width: 92vw;
+  z-index: 51;
+  background-color: var(--color-white);
+  box-shadow: 8px 0 32px rgba(15, 23, 42, 0.25);
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.drawer-panel.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.drawer-header-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-white);
+  letter-spacing: -0.01em;
+}
+
+.drawer-header-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+/* Navigazione a Schede del Drawer (Promemoria, Rubrica, Storico, Backup) */
+.drawer-nav-tabs {
+  display: flex;
+  background-color: var(--color-bg);
+  padding: 6px;
+  gap: 4px;
+  border-bottom: 1px solid var(--color-neutral-border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.drawer-nav-tab {
+  flex: 1;
+  min-width: 76px;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-neutral);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.drawer-nav-tab.active {
+  background-color: var(--color-white);
+  color: var(--color-primary);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+.drawer-nav-tab .icon {
+  margin-bottom: 2px;
+}
+
+/* Area Contenuto a Scorrimento */
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  -webkit-overflow-scrolling: touch;
+}
+
+.drawer-section {
+  display: none;
+}
+
+.drawer-section.active {
+  display: block;
+  animation: drawerFadeIn 0.2s ease;
+}
+
+@keyframes drawerFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Titoli e sottotitoli delle sezioni drawer */
+.drawer-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drawer-section-desc {
+  font-size: 13px;
+  color: var(--color-neutral);
+  margin-bottom: var(--space-4);
+  line-height: 1.4;
+}
+
+/* Switch iOS-Style per Promemoria */
+.switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--color-neutral-border);
+}
+
+.switch-label-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.switch-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.switch-hint {
+  font-size: 12px;
+  color: var(--color-neutral);
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #CBD5E1;
+  transition: 0.25s;
+  border-radius: 30px;
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.25s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.switch input:checked + .switch-slider {
+  background-color: var(--color-primary);
+}
+
+.switch input:checked + .switch-slider:before {
+  transform: translateX(22px);
+}
+
+/* Card Orari Promemoria */
+.reminder-card {
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--color-neutral-border);
+}
+
+.reminder-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--color-neutral-border);
+}
+
+.reminder-time-row:last-child {
+  border-bottom: none;
+}
+
+.reminder-time-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.reminder-time-input {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-primary);
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-neutral-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  min-height: 44px;
+}
+
+.reminder-time-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+/* Chip Giorni della Settimana */
+.days-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.day-chip {
+  min-height: 44px;
+  min-width: 44px;
+  flex: 1;
+  padding: 8px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-neutral-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-neutral);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.day-chip.active {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* Sotto-Schede Rubrica */
+.rubrica-subnav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: var(--space-3);
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.rubrica-pill {
+  min-height: 40px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-neutral-border);
+  background-color: var(--color-bg);
+  color: var(--color-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s ease;
+}
+
+.rubrica-pill.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.rubrica-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  margin-bottom: var(--space-3);
+  -webkit-overflow-scrolling: touch;
+}
+
+.rubrica-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-border);
+  border-radius: var(--radius-md);
+  min-height: 48px;
+}
+
+.rubrica-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.rubrica-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rubrica-card-sub {
+  font-size: 12px;
+  color: var(--color-neutral);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-icon-danger {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 4px;
+}
+
+.btn-icon-danger:active {
+  background-color: #FEE2E2;
+}
+
+/* Modulo di Aggiunta in Rubrica */
+.rubrica-add-form {
+  background-color: var(--color-bg);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-neutral-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Storico / Registro Rapportini */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+.history-card {
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-neutral-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.history-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.history-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.history-cantiere {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.history-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-neutral);
+}
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-neutral-border);
+}
+
+/* Sezione Backup */
+.backup-card {
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-neutral-border);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.backup-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backup-card-desc {
+  font-size: 13px;
+  color: var(--color-neutral);
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   12. UTILITY CLASSES (Tailwind-like Helper Classes)
+   ========================================================================== */
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.grid { display: grid; }
+.hidden { display: none; }
+.block { display: block; }
+
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.flex-1 { flex: 1; }
+
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+.py-2 { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+.py-3 { padding-top: var(--space-3); padding-bottom: var(--space-3); }
+.px-3 { padding-left: var(--space-3); padding-right: var(--space-3); }
+.px-4 { padding-left: var(--space-4); padding-right: var(--space-4); }
+
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+
+.text-xs { font-size: 12px; }
+.text-sm { font-size: 14px; }
+.text-base { font-size: 16px; }
+.text-lg { font-size: 18px; }
+.text-xl { font-size: 20px; }
+
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+.text-primary { color: var(--color-primary); }
+.text-accent { color: var(--color-accent); }
+.text-success { color: var(--color-success); }
+.text-neutral { color: var(--color-neutral); }
+.text-dark { color: var(--color-dark); }
+.text-white { color: var(--color-white); }
+
+.bg-primary { background-color: var(--color-primary); }
+.bg-light { background-color: var(--color-light); }
+.bg-white { background-color: var(--color-white); }
+.bg-success { background-color: var(--color-success) !important; }
+.bg-success-light { background-color: var(--color-success-light); }
+.bg-danger { background-color: var(--color-danger) !important; }
+
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-full { border-radius: var(--radius-full); }
+
+/* Stile Icona Standard */
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   13. MODALE COMPLETAMENTO E DIALOGHI POPUP
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: modalFadeIn 0.2s ease;
+}
+
+.modal-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2001;
+  width: 90%;
+  max-width: 480px;
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.modal-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  color: #FFFFFF;
+}
+
+.modal-dialog-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.modal-dialog-subtitle {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+}
+
+.modal-dialog-body {
+  padding: var(--space-4);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.completion-check-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: var(--radius-full);
+  background-color: #10B981;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.completion-summary-card {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.completion-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ==========================================================================
+   14. SCHERMATA DI BLOCCO PIN AZIENDALE & VERIFICA DISPOSITIVO UNA TANTUM
+   ========================================================================== */
+body.app-locked {
+  overflow: hidden !important;
+}
+
+body.app-locked .app-header,
+body.app-locked .app-main,
+body.app-locked .app-bottom-bar,
+body.app-locked .drawer-panel,
+body.app-locked .drawer-backdrop {
+  display: none !important;
+}
+
+.pin-lock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: linear-gradient(180deg, #0A192F 0%, #102A4C 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  color: #FFFFFF;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.pin-lock-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.pin-lock-card {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.pin-lock-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pin-logo {
+  height: 44px;
+  max-width: 190px;
+  object-fit: contain;
+  background: #FFFFFF;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.pin-lock-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.pin-lock-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #93C5FD;
+  margin-top: 2px;
+}
+
+.pin-lock-heading {
+  margin-bottom: 12px;
+}
+
+.pin-badge {
+  display: inline-block;
+  background: rgba(59, 130, 246, 0.22);
+  border: 1px solid rgba(147, 197, 253, 0.35);
+  color: #BFDBFE;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.pin-instructions {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Box Verifica Dispositivo Una Tantum */
+.device-verification-box {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(147, 197, 253, 0.25);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.device-id-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.device-id-label {
+  font-size: 11px;
+  color: #93C5FD;
+  font-weight: 600;
+}
+
+.device-id-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  color: #38BDF8;
+  letter-spacing: 0.05em;
+}
+
+.device-verify-step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.device-input-sm {
+  min-height: 40px !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #0F172A !important;
+}
+
+.device-verify-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-sm-action {
+  min-height: 40px !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  flex: 1;
+}
+
+.device-code-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #BFDBFE;
+}
+
+.device-code-input {
+  min-height: 42px !important;
+  padding: 6px 10px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #0F172A !important;
+}
+
+/* 4 Pallini di inserimento */
+.pin-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 12px 0 10px 0;
+  transition: transform 0.2s ease;
+}
+
+.pin-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  transition: all 0.15s ease;
+}
+
+.pin-dot.filled {
+  background: #38BDF8;
+  border-color: #38BDF8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+  transform: scale(1.15);
+}
+
+.pin-dots.success .pin-dot {
+  background: #10B981;
+  border-color: #10B981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.9);
+}
+
+.pin-dots.shake {
+  animation: pinShake 0.4s ease;
+}
+
+@keyframes pinShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+
+.pin-status-msg {
+  font-size: 12.5px;
+  font-weight: 700;
+  min-height: 18px;
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.pin-status-msg.text-danger {
+  color: #FCA5A5 !important;
+}
+
+.pin-status-msg.text-success {
+  color: #6EE7B7 !important;
+}
+
+/* Tastierino Touch */
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 270px;
+  margin: 4px auto 12px auto;
+}
+
+.pin-key {
+  height: 56px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  font-size: 22px;
+  font-weight: 700;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease, transform 0.08s ease;
+}
+
+.pin-key:active {
+  background: rgba(56, 189, 248, 0.35);
+  transform: scale(0.94);
+  border-color: #38BDF8;
+}
+
+.pin-key-action {
+  font-size: 20px;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #FCA5A5;
+}
+
+.pin-key-action:active {
+  background: rgba(239, 68, 68, 0.35);
+}
+
+.pin-key-placeholder {
+  pointer-events: none;
+}
+
+.pin-toggle-activation {
+  margin-bottom: 8px;
+}
+
+.btn-link-subtle {
+  background: transparent;
+  border: none;
+  color: #93C5FD;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.pin-footer-info {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.3;
+}
+
+/* Pannello Admin Generazione Codici nel Drawer */
+.admin-approval-card {
+  border: 1.5px solid var(--color-primary);
+  background-color: #F0F7FF;
+}
+
+.admin-generated-code-box {
+  background: #0F172A;
+  color: #38BDF8;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+  word-break: break-all;
+}
+
+.admin-generated-code-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+
+
