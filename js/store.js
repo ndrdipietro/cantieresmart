@@ -871,7 +871,34 @@
                     caption: cleanStr(f.caption || f.didascalia || '', 300)
                   }))
               : [];
-            return Object.assign({}, r, {
+            const safeOperai = Array.isArray(r.operai)
+              ? r.operai
+                  .filter(op => (typeof op === 'string' && cleanStr(op, 150)) || (op && typeof op === 'object' && cleanStr(op.nome, 150)))
+                  .slice(0, 60)
+                  .map(op => typeof op === 'string'
+                    ? { nome: cleanStr(op, 150), ore: 8 }
+                    : { nome: cleanStr(op.nome, 150), ore: Math.max(1, Math.min(24, Number(op.ore) || 8)) })
+              : [];
+            const rawSubs = Array.isArray(r.subappalti) ? r.subappalti : (Array.isArray(r.subappaltatori) ? r.subappaltatori : []);
+            const safeSubappalti = rawSubs
+              .filter(s => (typeof s === 'string' && cleanStr(s, 200)) || (s && typeof s === 'object' && cleanStr(s.ditta || s.nome, 200)))
+              .slice(0, 60)
+              .map(s => typeof s === 'string'
+                ? { ditta: cleanStr(s, 200), operai: 1, lavorazione: '' }
+                : {
+                    ditta: cleanStr(s.ditta || s.nome, 200),
+                    operai: Math.max(1, Math.min(200, Number(s.operai) || 1)),
+                    lavorazione: cleanStr(s.lavorazione, 300)
+                  });
+            const safeNoleggi = Array.isArray(r.noleggi)
+              ? r.noleggi
+                  .filter(n => (typeof n === 'string' && cleanStr(n, 200)) || (n && typeof n === 'object' && cleanStr(n.mezzo || n.nome, 200)))
+                  .slice(0, 60)
+                  .map(n => typeof n === 'string'
+                    ? { mezzo: cleanStr(n, 200), ore: 8 }
+                    : { mezzo: cleanStr(n.mezzo || n.nome, 200), ore: Math.max(1, Math.min(24, Number(n.ore) || 8)) })
+              : [];
+            return {
               id: cleanStr(r.id, 80) || generateId('rap'),
               data: cleanStr(r.data, 20),
               cantiere: typeof r.cantiere === 'string' ? cleanStr(r.cantiere, 200) : cleanStr(r.cantiere && r.cantiere.nome, 200),
@@ -880,11 +907,30 @@
               cup: cleanStr(r.cup, 64),
               cig: cleanStr(r.cig, 64),
               meteo: cleanStr(r.meteo, 30),
+              temperatura: typeof r.temperatura === 'number' ? Math.max(-25, Math.min(55, Math.round(r.temperatura))) : 22,
               lavorazioni: cleanStr(r.lavorazioni, 5000),
+              naLavorazioni: Boolean(r.naLavorazioni),
+              operai: safeOperai,
+              totaleOperaiVittorini: safeOperai.length,
+              totaleOreVittorini: safeOperai.reduce((sum, o) => sum + (Number(o.ore) || 8), 0),
+              zeroOperai: Boolean(r.zeroOperai),
+              subappalti: safeSubappalti,
+              totaleOperaiSubappalti: safeSubappalti.reduce((sum, s) => sum + (Number(s.operai) || 1), 0),
+              nessunSubappalto: Boolean(r.nessunSubappalto),
+              noleggi: safeNoleggi,
+              nessunNoleggio: Boolean(r.nessunNoleggio),
               materiali: cleanStr(r.materiali, 5000),
+              nessunMateriale: Boolean(r.nessunMateriale),
               note: cleanStr(r.note, 5000),
-              foto: safeFoto
-            });
+              nessunaNota: Boolean(r.nessunaNota),
+              foto: safeFoto,
+              totaleFoto: safeFoto.length,
+              nessunaFoto: Boolean(r.nessunaFoto),
+              completedCount: Math.max(0, Math.min(9, Number(r.completedCount) || 0)),
+              isComplete: Boolean(r.isComplete),
+              createdAt: cleanStr(r.createdAt, 40) || new Date().toISOString(),
+              updatedAt: cleanStr(r.updatedAt, 40) || new Date().toISOString()
+            };
           });
         StorageDriver.set(STORAGE_KEYS.RAPPORTINI, validRapportini);
         countRapportini = validRapportini.length;

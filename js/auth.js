@@ -4,10 +4,10 @@
  *
  * Architettura di Sicurezza Serverless (100% Offline-First):
  * 1. Verifica Dispositivo Una Tantum (Convalida Amministratore vincolata all'ID Dispositivo).
- * 2. Sblocco quotidiano con PIN Aziendale a 4 cifre protetto da PBKDF2-HMAC-SHA256 (150.000 iterazioni).
+ * 2. Sblocco quotidiano con PIN Aziendale a 6 cifre protetto da PBKDF2-HMAC-SHA256 (150.000 iterazioni).
  * 3. Archivio Aziendale Cifrato (SHA256-CTR + Encrypt-then-HMAC-SHA256 a 256 bit):
  *    Cantieri, CUP/CIG e Subappaltatori sono indecifrabili senza Convalida Dispositivo + PIN.
- * 4. Protezione Anti-Brute-Force con blocco esponenziale e revoca automatica dopo 15 tentativi errati.
+ * 4. Blocco progressivo dei tentativi e revoca automatica dopo 15 tentativi errati.
  * 5. Scadenza sessione lavorativa automatica (12 ore).
  */
 
@@ -16,11 +16,13 @@
 
   const STORAGE_KEYS = {
     DEVICE_ID: 'cantieresmart_device_id_v2',
-    DEVICE_AUTH: 'cantieresmart_device_auth_v2',
-    SESSION: 'cantieresmart_session_v3',
-    SESSION_EPH_KEY: 'cantieresmart_eph_key_v3',
+    DEVICE_AUTH: 'cantieresmart_device_auth_v3',
+    SESSION: 'cantieresmart_session_v4',
+    SESSION_EPH_KEY: 'cantieresmart_eph_key_v4',
     USERDATA_ENC: 'cantieresmart_userdata_enc_v3',
     ATTEMPTS: 'cantieresmart_auth_attempts_v2',
+    LEGACY_DEVICE_AUTH_V2: 'cantieresmart_device_auth_v2',
+    LEGACY_SESSION_V3: 'cantieresmart_session_v3',
     LEGACY_SESSION_V2: 'cantieresmart_session_v2',
     LEGACY_UNLOCKED: 'cantieresmart_unlocked_v1'
   };
@@ -32,11 +34,11 @@
 
   // Archivio Aziendale Crittografato (PBKDF2-HMAC-SHA256 150.000 iterazioni + SHA256-CTR + HMAC-SHA256)
   const ENCRYPTED_COMPANY_VAULT = {
-    "salt": "7c9e2a41b8d053f6e1a94c827d3b60e5",
-    "iv": "3f8b12d49a6c05e7b24189c3d05a7e1f",
-    "mac": "8f1fa3e60d9bed4775a025bd442c9391ac3d9d5d63b9ea3e96e07e1f7e88ad86",
-    "ct": "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"
-};
+    "salt": "21c02fa0f27620066cb593ffb1a7b2d2",
+    "iv": "1bbe6e4ab8aa067957b71a206bcbcaca",
+    "mac": "244f4628b0be68cda86ec249551eb560f17f25e9c216a3ee0edf03e9c7e80853",
+    "ct": "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"
+  };
 
   // =========================================================================
   // PRIMITIVE CRITTOGRAFICHE (WebCrypto + Node.js + Pure-JS Fallback per LAN)
@@ -355,10 +357,17 @@
     }
   }
 
-  function deriveUserDataKey(vBytes, deviceId) {
-    if (!vBytes || vBytes.length !== 13) return null;
+  function deriveUserDataKey(kMacOrVBytes, deviceId) {
+    if (!kMacOrVBytes || (kMacOrVBytes.length !== 32 && kMacOrVBytes.length !== 13)) return null;
     const normDev = normalizeDeviceId(deviceId);
-    return hmacSha256Bytes(vBytes, 'USERDATA-STORE-KEY:v3:' + normDev);
+    const domain = kMacOrVBytes.length === 32 ? 'USERDATA-STORE-KEY:v4:' : 'USERDATA-STORE-KEY:v3:';
+    return hmacSha256Bytes(kMacOrVBytes, domain + normDev);
+  }
+
+  function computeRoleTag(kMacBytes, deviceId, role) {
+    if (!kMacBytes || kMacBytes.length !== 32) return '';
+    const normDev = normalizeDeviceId(deviceId);
+    return bytesToHex(hmacSha256Bytes(kMacBytes, 'ROLE-BIND:v3:' + normDev + ':' + String(role || 'operator')).slice(0, 8));
   }
 
   // =========================================================================
@@ -366,9 +375,10 @@
   // =========================================================================
 
   /**
-   * Decifra il Vault aziendale usando il segreto V (13 byte) e il PIN aziendale (4 cifre)
+   * Decifra il Vault aziendale usando il segreto V (13 byte) e il PIN aziendale.
+   * Se options.withKeys === true, restituisce { vault, kMac } per derivare chiavi storage PBKDF2-bound.
    */
-  async function decryptCompanyVault(vBytes, pinStr) {
+  async function decryptCompanyVault(vBytes, pinStr, options) {
     if (!vBytes || vBytes.length !== 13 || !pinStr) return null;
     const vHex = bytesToHex(vBytes);
     const salt = hexToBytes(ENCRYPTED_COMPANY_VAULT.salt);
@@ -400,7 +410,11 @@
     }
 
     try {
-      return JSON.parse(bytesToUtf8(ptBytes));
+      const parsedVault = JSON.parse(bytesToUtf8(ptBytes));
+      if (options && options.withKeys) {
+        return { vault: parsedVault, kMac: kMac };
+      }
+      return parsedVault;
     } catch (e) {
       return null;
     }
@@ -489,10 +503,14 @@
   // AUTH MANAGER & INTERFACCIA DI SBLOCCO
   // =========================================================================
 
+  // Variabili private nella closure (non esposte su window.AuthManager)
+  let _privateVaultSecret = null;
+  let _privateSessionPin = null;
+  let _privateUserDataKey = null;
+  let _memoryAttemptState = { count: 0, lockedUntil: 0 };
+
   const AuthManager = {
     currentPin: '',
-    _activeVaultSecret: null, // In memoria solo a sessione sbloccata
-    _activeSessionPin: null,  // In memoria solo a sessione sbloccata
     _pendingApproveRequest: null,
     _eventsBound: false,
     _lockoutTimer: null,
@@ -530,10 +548,19 @@
     getDeviceAuthRecord: function () {
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.DEVICE_AUTH);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed.wrappedSecret === 'string' && parsed.wrappedSecret.length === 26) {
-          return parsed;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed.wrappedSecret === 'string' && parsed.wrappedSecret.length === 26) {
+            return parsed;
+          }
+        }
+        const rawV2 = localStorage.getItem(STORAGE_KEYS.LEGACY_DEVICE_AUTH_V2);
+        if (rawV2) {
+          const parsedV2 = JSON.parse(rawV2);
+          if (parsedV2 && typeof parsedV2.wrappedSecret === 'string' && parsedV2.wrappedSecret.length === 26) {
+            parsedV2._legacyV2 = true;
+            return parsedV2;
+          }
         }
       } catch (e) {}
       return null;
@@ -579,6 +606,7 @@
           expiresAt: sess.expiresAt,
           role: decryptedPayload.role || sess.role || 'operator',
           vHex: decryptedPayload.vHex,
+          uKeyHex: decryptedPayload.uKeyHex,
           sessionPin: decryptedPayload.sessionPin,
           vaultCache: decryptedPayload.vaultCache
         };
@@ -590,32 +618,43 @@
     clearSessionStorage: function () {
       try {
         localStorage.removeItem(STORAGE_KEYS.SESSION);
+        localStorage.removeItem(STORAGE_KEYS.LEGACY_SESSION_V3);
         localStorage.removeItem(STORAGE_KEYS.LEGACY_SESSION_V2);
         localStorage.removeItem(STORAGE_KEYS.LEGACY_UNLOCKED);
       } catch (e) {}
       try {
         if (typeof sessionStorage !== 'undefined') {
           sessionStorage.removeItem(STORAGE_KEYS.SESSION_EPH_KEY);
+          sessionStorage.removeItem('cantieresmart_eph_key_v3');
         }
       } catch (e) {}
     },
 
-    loadEncryptedUserData: function (vBytes, devId) {
+    loadEncryptedUserData: function (keySourceBytes, devId, fallbackVBytes) {
       try {
-        const key32 = deriveUserDataKey(vBytes, devId);
-        if (!key32) return null;
         const raw = localStorage.getItem(STORAGE_KEYS.USERDATA_ENC);
         if (!raw) return null;
         const env = JSON.parse(raw);
-        return decryptJsonWithKey(env, key32);
+        const key32 = (keySourceBytes && keySourceBytes.length === 32)
+          ? deriveUserDataKey(keySourceBytes, devId)
+          : null;
+        if (key32) {
+          const dec = decryptJsonWithKey(env, key32);
+          if (dec) return dec;
+        }
+        if (fallbackVBytes && fallbackVBytes.length === 13) {
+          const legacyKey = deriveUserDataKey(fallbackVBytes, devId);
+          if (legacyKey) return decryptJsonWithKey(env, legacyKey);
+        }
+        return null;
       } catch (e) {
         return null;
       }
     },
 
-    saveEncryptedUserData: function (vBytes, devId, storeSnapshot) {
+    saveEncryptedUserData: function (keySourceBytes, devId, storeSnapshot) {
       try {
-        const key32 = deriveUserDataKey(vBytes, devId);
+        const key32 = deriveUserDataKey(keySourceBytes, devId);
         if (!key32 || !storeSnapshot) return false;
         const env = encryptJsonWithKey(storeSnapshot, key32);
         if (env) {
@@ -647,20 +686,33 @@
     },
 
     /**
-     * Gestione tentativi falliti e lockout anti-brute-force
+     * Gestione tentativi falliti e lockout sincronizzato su più livelli di storage
      */
     getAttemptState: function () {
+      let lsCount = 0, lsLocked = 0;
+      let ssCount = 0, ssLocked = 0;
       try {
-        const raw = localStorage.getItem(STORAGE_KEYS.ATTEMPTS);
-        if (!raw) return { count: 0, lockedUntil: 0 };
-        const parsed = JSON.parse(raw);
-        return {
-          count: Number(parsed.count) || 0,
-          lockedUntil: Number(parsed.lockedUntil) || 0
-        };
-      } catch (e) {
-        return { count: 0, lockedUntil: 0 };
-      }
+        const rawLs = localStorage.getItem(STORAGE_KEYS.ATTEMPTS);
+        if (rawLs) {
+          const p = JSON.parse(rawLs);
+          lsCount = Number(p.count) || 0;
+          lsLocked = Number(p.lockedUntil) || 0;
+        }
+      } catch (e) {}
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          const rawSs = sessionStorage.getItem(STORAGE_KEYS.ATTEMPTS);
+          if (rawSs) {
+            const p = JSON.parse(rawSs);
+            ssCount = Number(p.count) || 0;
+            ssLocked = Number(p.lockedUntil) || 0;
+          }
+        }
+      } catch (e) {}
+      return {
+        count: Math.max(lsCount, ssCount, _memoryAttemptState.count || 0),
+        lockedUntil: Math.max(lsLocked, ssLocked, _memoryAttemptState.lockedUntil || 0)
+      };
     },
 
     recordFailedAttempt: function () {
@@ -669,11 +721,18 @@
 
       if (state.count >= MAX_TOTAL_ATTEMPTS) {
         // Revoca automatica dell'attivazione del dispositivo dopo 15 tentativi errati
+        const lockUntilRevoke = Date.now() + 15 * 60 * 1000;
         this.clearDeviceAuthorization();
+        _memoryAttemptState = { count: 0, lockedUntil: lockUntilRevoke };
         try {
-          localStorage.setItem(STORAGE_KEYS.ATTEMPTS, JSON.stringify({ count: 0, lockedUntil: Date.now() + 15 * 60 * 1000 }));
+          localStorage.setItem(STORAGE_KEYS.ATTEMPTS, JSON.stringify(_memoryAttemptState));
         } catch (e) {}
-        return { revoked: true, count: state.count, lockedUntil: Date.now() + 15 * 60 * 1000 };
+        try {
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem(STORAGE_KEYS.ATTEMPTS, JSON.stringify(_memoryAttemptState));
+          }
+        } catch (e) {}
+        return { revoked: true, count: state.count, lockedUntil: lockUntilRevoke };
       }
 
       let lockMs = 0;
@@ -685,34 +744,49 @@
         state.lockedUntil = Date.now() + lockMs;
       }
 
+      _memoryAttemptState = { count: state.count, lockedUntil: state.lockedUntil };
       try {
         localStorage.setItem(STORAGE_KEYS.ATTEMPTS, JSON.stringify(state));
+      } catch (e) {}
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem(STORAGE_KEYS.ATTEMPTS, JSON.stringify(state));
+        }
       } catch (e) {}
       return { revoked: false, count: state.count, lockedUntil: state.lockedUntil };
     },
 
     resetAttempts: function () {
+      _memoryAttemptState = { count: 0, lockedUntil: 0 };
       try {
         localStorage.removeItem(STORAGE_KEYS.ATTEMPTS);
+      } catch (e) {}
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem(STORAGE_KEYS.ATTEMPTS);
+        }
       } catch (e) {}
     },
 
     clearDeviceAuthorization: function () {
-      this._activeVaultSecret = null;
-      this._activeSessionPin = null;
+      _privateVaultSecret = null;
+      _privateSessionPin = null;
+      _privateUserDataKey = null;
       this.clearSessionStorage();
       if (global.CantiereStore && typeof global.CantiereStore.lockVaultData === 'function') {
         global.CantiereStore.lockVaultData();
       }
       try {
         localStorage.removeItem(STORAGE_KEYS.DEVICE_AUTH);
+        localStorage.removeItem(STORAGE_KEYS.LEGACY_DEVICE_AUTH_V2);
         localStorage.removeItem(STORAGE_KEYS.USERDATA_ENC);
       } catch (e) {}
     },
 
     lock: function () {
-      this._activeVaultSecret = null;
-      this._activeSessionPin = null;
+      _privateVaultSecret = null;
+      _privateSessionPin = null;
+      _privateUserDataKey = null;
       this.clearSessionStorage();
       if (global.CantiereStore && typeof global.CantiereStore.lockVaultData === 'function') {
         global.CantiereStore.lockVaultData();
@@ -743,23 +817,33 @@
 
       this.bindEvents();
 
+      // Se il dispositivo è già Admin attivo, ignora codici operatore esterni (#attiva=ATTIVA-...) per evitare downgrade
+      if (this._pendingActivationCode && this.isAdminDevice() && !this._pendingActivationCode.startsWith('ADMIN-')) {
+        this._pendingActivationCode = null;
+      }
+
       // Se c'è una sessione valida cifrata attiva e il dispositivo è convalidato
       const validSession = this.getValidSession();
       if (validSession && this.isDeviceActivated() && !this._pendingActivationCode) {
         const devId = this.getDeviceId();
-        if (validSession.vHex) {
-          this._activeVaultSecret = hexToBytes(validSession.vHex);
+        if (validSession.role === 'admin' && validSession.vHex) {
+          _privateVaultSecret = hexToBytes(validSession.vHex);
         }
-        if (validSession.sessionPin) {
-          this._activeSessionPin = validSession.sessionPin;
+        if (validSession.role === 'admin' && validSession.sessionPin) {
+          _privateSessionPin = validSession.sessionPin;
+        }
+        if (validSession.uKeyHex && validSession.uKeyHex.length === 64) {
+          _privateUserDataKey = hexToBytes(validSession.uKeyHex);
+        } else if (validSession.vHex) {
+          _privateUserDataKey = hexToBytes(validSession.vHex);
         }
         if (validSession.vaultCache && global.CantiereStore && typeof global.CantiereStore.unlockVaultData === 'function') {
-          const vBytes = this._activeVaultSecret;
-          const decryptedUserStore = vBytes ? this.loadEncryptedUserData(vBytes, devId) : null;
+          const keySrc = _privateUserDataKey;
+          const decryptedUserStore = keySrc ? this.loadEncryptedUserData(keySrc, devId, _privateVaultSecret) : null;
           global.CantiereStore.unlockVaultData(
             validSession.vaultCache,
             decryptedUserStore,
-            vBytes ? (snap) => this.saveEncryptedUserData(vBytes, devId, snap) : null
+            keySrc ? (snap) => this.saveEncryptedUserData(keySrc, devId, snap) : null
           );
         }
         this.setProtectedDomVisibility(true);
@@ -855,8 +939,8 @@
         }
         if (pinInstructions) {
           pinInstructions.textContent = this._pendingActivationCode
-            ? 'Codice di convalida caricato! Ora digita il PIN aziendale a 4 cifre per sbloccare:'
-            : 'Incolla il Codice di Convalida ricevuto da Andrea e digita il PIN aziendale:';
+            ? 'Codice di convalida caricato! Ora digita il PIN aziendale a 6 cifre per sbloccare:'
+            : 'Incolla il Codice di Convalida ricevuto da Andrea e digita il PIN aziendale a 6 cifre:';
         }
       } else {
         if (deviceBox) deviceBox.style.display = 'none';
@@ -868,7 +952,7 @@
             : '🔒 Dispositivo Autorizzato (' + devId + ')';
         }
         if (pinInstructions) {
-          pinInstructions.textContent = 'Inserisci il PIN aziendale a 4 cifre per sbloccare la sessione:';
+          pinInstructions.textContent = 'Inserisci il PIN aziendale a 6 cifre per sbloccare la sessione:';
         }
       }
     },
@@ -981,11 +1065,11 @@
 
     appendDigit: function (digit) {
       if (this.isCurrentlyLockedOut()) return;
-      if (this.currentPin.length >= 4) return;
+      if (this.currentPin.length >= 6) return;
       this.currentPin += String(digit);
       this.updatePinDots();
 
-      if (this.currentPin.length === 4) {
+      if (this.currentPin.length === 6) {
         this.verifyPin();
       }
     },
@@ -1100,7 +1184,8 @@
       } else {
         const rec = this.getDeviceAuthRecord();
         if (rec) {
-          vBytes = unwrapSecretFromStorage(rec.wrappedSecret, devId, enteredPin);
+          const unwrapPin = rec._legacyV2 ? enteredPin.slice(0, 4) : enteredPin;
+          vBytes = unwrapSecretFromStorage(rec.wrappedSecret, devId, unwrapPin);
           role = rec.role || 'operator';
         } else {
           this.showLockStatus('⚠️ Dispositivo non convalidato. Inserisci prima il Codice di Convalida di Andrea.', 'danger');
@@ -1112,20 +1197,31 @@
 
       // Esegue SEMPRE le 150.000 iterazioni PBKDF2 anche se il formato codice è errato (zero timing side-channel)
       const candidateV = (vBytes && vBytes.length === 13) ? vBytes : new Uint8Array(13);
-      const rawVault = await decryptCompanyVault(candidateV, enteredPin);
-      const decryptedVault = (tagValid && vBytes) ? rawVault : null;
+      const vaultResult = await decryptCompanyVault(candidateV, enteredPin, { withKeys: true });
+      const decryptedVault = (tagValid && vBytes && vaultResult) ? vaultResult.vault : null;
+      const kMacBytes = (tagValid && vBytes && vaultResult) ? vaultResult.kMac : null;
 
-      if (decryptedVault) {
+      if (decryptedVault && kMacBytes) {
+        // Verifica anti-manomissione del ruolo salvato in localStorage
+        const existingRec = this.getDeviceAuthRecord();
+        if (!typedCode && existingRec && !existingRec._legacyV2 && existingRec.roleTag) {
+          const expectedRoleTag = computeRoleTag(kMacBytes, devId, role);
+          if (!constantTimeEqualHex(existingRec.roleTag, expectedRoleTag)) {
+            role = 'operator';
+          }
+        }
+
         // SUCCESSO: PIN e Convalida Dispositivo autentici!
         this.resetAttempts();
-        this._activeVaultSecret = vBytes;
-        this._activeSessionPin = enteredPin;
+        _privateVaultSecret = role === 'admin' ? vBytes : null;
+        _privateSessionPin = role === 'admin' ? enteredPin : null;
+        _privateUserDataKey = kMacBytes;
         this._pendingActivationCode = null;
 
-        // Salva il record di attivazione dispositivo Una Tantum (con segreto avvolto dal PIN)
+        // Salva il record di attivazione dispositivo Una Tantum (con segreto avvolto dal PIN e roleTag PBKDF2-bound)
         const wrappedHex = wrapSecretForStorage(vBytes, devId, enteredPin);
+        const roleTagHex = computeRoleTag(kMacBytes, devId, role);
         const operatorNameInput = document.getElementById('input-operator-name');
-        const existingRec = this.getDeviceAuthRecord();
         const operatorName = (operatorNameInput && operatorNameInput.value.trim())
           ? operatorNameInput.value.trim().slice(0, 80)
           : (existingRec && existingRec.operatorName ? existingRec.operatorName : '');
@@ -1134,10 +1230,13 @@
           localStorage.setItem(STORAGE_KEYS.DEVICE_AUTH, JSON.stringify({
             deviceId: devId,
             role: role,
+            roleTag: roleTagHex,
             operatorName: operatorName,
             wrappedSecret: wrappedHex,
             activatedAt: (existingRec && existingRec.activatedAt) || new Date().toISOString()
           }));
+          localStorage.removeItem(STORAGE_KEYS.LEGACY_DEVICE_AUTH_V2);
+          localStorage.removeItem(STORAGE_KEYS.LEGACY_SESSION_V3);
 
           // Cifra la sessione lavorativa con una chiave effimera a 256 bit custodita in sessionStorage
           const ephKey = getRandomBytes(32);
@@ -1146,7 +1245,8 @@
           }
           const sessionEnvelope = encryptJsonWithKey({
             role: role,
-            vHex: bytesToHex(vBytes),
+            vHex: role === 'admin' ? bytesToHex(vBytes) : undefined,
+            uKeyHex: bytesToHex(kMacBytes),
             sessionPin: role === 'admin' ? enteredPin : undefined,
             vaultCache: decryptedVault
           }, ephKey);
@@ -1159,13 +1259,13 @@
           }));
         } catch (e) {}
 
-        // Inietta in RAM i 36 cantieri, i 60 subappaltatori e lo storico utente decifrato
+        // Inietta in RAM i 36 cantieri, i 60 subappaltatori e lo storico utente decifrato (con chiave PBKDF2-bound)
         if (global.CantiereStore && typeof global.CantiereStore.unlockVaultData === 'function') {
-          const decryptedUserStore = this.loadEncryptedUserData(vBytes, devId);
+          const decryptedUserStore = this.loadEncryptedUserData(kMacBytes, devId, vBytes);
           global.CantiereStore.unlockVaultData(
             decryptedVault,
             decryptedUserStore,
-            (snap) => this.saveEncryptedUserData(vBytes, devId, snap)
+            (snap) => this.saveEncryptedUserData(kMacBytes, devId, snap)
           );
         }
 
@@ -1241,7 +1341,8 @@
     },
 
     /**
-     * Se Andrea ha aperto un link #approva=CS-XXXX-XXXX da WhatsApp, apre subito il pannello Admin precompilato
+     * Se Andrea ha aperto un link #approva=CS-XXXX-XXXX da WhatsApp, apre il pannello Admin precompilato
+     * attendendo il click esplicito dell'amministratore prima di generare o copiare il codice.
      */
     checkPendingApproveModal: function () {
       if (!this._pendingApproveRequest || !this.isAdminDevice()) return;
@@ -1255,10 +1356,15 @@
 
       const targetInput = document.getElementById('admin-target-device-id');
       const userInput = document.getElementById('admin-target-user-name');
-      if (targetInput) targetInput.value = req.deviceId;
+      if (targetInput) {
+        targetInput.value = req.deviceId;
+        targetInput.focus();
+      }
       if (userInput) userInput.value = req.userName || '';
 
-      this.handleAdminGenerateCode(false);
+      if (global.showToast) {
+        global.showToast('Richiesta di ' + (req.userName || req.deviceId) + ' caricata: premi "Genera Codice" o "Invia WhatsApp" per confermare.', 'info', 4500);
+      }
     },
 
     /**
@@ -1266,7 +1372,7 @@
      * Usa URL Fragment (#attiva=...) così il codice non viene mai inviato nei log HTTP dei server.
      */
     handleAdminGenerateCode: function (sendViaWhatsApp) {
-      if (!this.isAdminDevice() || !this._activeVaultSecret || !this._activeSessionPin) {
+      if (!this.isAdminDevice() || !_privateVaultSecret || !_privateSessionPin) {
         if (global.showToast) global.showToast('Sblocca nuovamente l\'app con il PIN per generare codici.', 'danger');
         return null;
       }
@@ -1284,7 +1390,7 @@
         return null;
       }
 
-      const code = this.generateCodeForDevice(targetDevId, this._activeSessionPin);
+      const code = this.generateCodeForDevice(targetDevId, _privateSessionPin);
       if (!code) return null;
 
       if (outputBox) outputBox.style.display = 'block';
@@ -1316,8 +1422,8 @@
      * API pubblica/test per generare un codice dispositivo avendo il segreto Admin sbloccato
      */
     generateCodeForDevice: function (targetDeviceId, pinStr) {
-      if (!this._activeVaultSecret) return null;
-      return generateDeviceActivationCode(this._activeVaultSecret, targetDeviceId, pinStr);
+      if (!_privateVaultSecret) return null;
+      return generateDeviceActivationCode(_privateVaultSecret, targetDeviceId, pinStr);
     },
 
     /**
@@ -1329,8 +1435,10 @@
       const rawVault = await decryptCompanyVault(candidateV, pinStr);
       if (!parsed || parsed.tagValid === false) return { success: false, reason: 'INVALID_CODE' };
       if (!rawVault) return { success: false, reason: 'INVALID_PIN_OR_VAULT' };
-      this._activeVaultSecret = parsed.vBytes;
-      this._activeSessionPin = pinStr;
+      if (parsed.role === 'admin') {
+        _privateVaultSecret = parsed.vBytes;
+        _privateSessionPin = pinStr;
+      }
       return {
         success: true,
         role: parsed.role,

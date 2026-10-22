@@ -5,7 +5,7 @@
  * Version: 1.1.0
  */
 
-const CACHE_NAME = 'cantieresmart-v5';
+const CACHE_NAME = 'cantieresmart-v6';
 
 // Asset statici principali da precachare
 const PRECACHE_ASSETS = [
@@ -156,7 +156,13 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
 
-  const targetUrl = new URL(event.notification.data?.url || './', self.location.origin).href;
+  let targetUrl = new URL('./', self.location.origin).href;
+  try {
+    const candidate = new URL(event.notification.data?.url || './', self.location.origin);
+    if (candidate.origin === self.location.origin) {
+      targetUrl = candidate.href;
+    }
+  } catch (e) {}
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
